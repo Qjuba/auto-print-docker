@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pl" class="overflow-x-clip bg-white">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Panel automatycznego drukowania przez CUPS i IPP">
+  <title>AutoPrint</title>
+  <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body class="min-h-svh overflow-x-clip bg-white font-sans text-neutral-950 antialiased">
+  <a class="skip-link" href="#main">Przejdź do treści</a>
+  <div id="app-shell" class="min-h-svh">
+    <header class="sticky top-0 z-20 border-b border-neutral-200 bg-white/95 backdrop-blur">
+      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <a href="/dashboard" class="flex min-h-11 items-center" data-go="dashboard"><img src="/static/logo.svg" alt="AutoPrint" class="h-11 w-auto"></a>
+        <div class="flex items-center gap-2 sm:gap-4"><div class="hidden items-center gap-2 text-sm text-neutral-600 sm:flex"><span class="status-dot" id="header-pulse"></span><span id="header-status">Łączenie…</span></div><button class="button button-quiet hidden" id="logout-button" type="button">Wyloguj</button></div>
+      </div>
+      <nav class="mx-auto flex max-w-7xl justify-between gap-0 px-2 sm:justify-start sm:gap-1 sm:px-6 lg:px-8" aria-label="Główna nawigacja"><a class="nav-link active" href="/dashboard" data-view="dashboard">Przegląd</a><a class="nav-link" href="/settings" data-view="setup">Konfiguracja</a><a class="nav-link" href="/history" data-view="history">Historia</a><a class="nav-link" href="/logs" data-view="logs">Logi</a></nav>
+    </header>
+
+    <main id="main" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section class="view active" id="view-dashboard" aria-labelledby="dashboard-title">
+        <div class="section-head"><div><h1 id="dashboard-title">Przegląd</h1><p>Stan automatycznego drukowania i ostatnie zadania.</p></div><div class="flex flex-wrap gap-2"><button class="button button-secondary" id="test-print">Druk testowy</button><button class="button button-primary" id="manual-print">Drukuj teraz</button></div></div>
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article class="summary-card md:col-span-2"><div class="flex items-start justify-between gap-4"><div><p class="card-label">Automatyzacja</p><h2 id="auto-state">—</h2></div><span class="status-dot mt-1" id="auto-dot"></span></div><p id="schedule-summary" class="mt-6 text-sm text-neutral-600">Ładowanie…</p><button class="link-button mt-4" data-go="setup">Zmień ustawienia</button></article>
+          <article class="summary-card"><p class="card-label">Następny wydruk</p><strong id="next-run">—</strong><small id="next-run-relative">Brak terminu</small></article>
+          <article class="summary-card"><p class="card-label">Ostatni wynik</p><strong id="last-result">—</strong><small id="last-result-time">Brak historii</small></article>
+          <article class="summary-card md:col-span-1 xl:col-span-2"><p class="card-label">Drukarka</p><strong id="printer-name">Nie wybrano</strong><small id="printer-state">—</small></article>
+          <article class="summary-card md:col-span-1 xl:col-span-2"><p class="card-label">Plik</p><strong id="file-name">Nie wybrano</strong><small id="file-meta">—</small></article>
+        </div>
+        <div class="mt-8 flex items-center justify-between gap-4"><h2>Ostatnie zadania</h2><button class="link-button" data-go="history">Zobacz historię</button></div>
+        <div class="table-wrap mt-3"><table><thead><tr><th>Czas</th><th>Plik</th><th>Tryb</th><th>Wynik</th></tr></thead><tbody id="recent-history"></tbody></table></div>
+      </section>
+
+      <section class="view" id="view-setup" aria-labelledby="setup-title">
+        <div class="section-head"><div><h1 id="setup-title">Konfiguracja</h1><p>Wybierz plik, drukarkę i harmonogram.</p></div><button class="button button-primary" type="submit" form="config-form">Zapisz</button></div>
+        <form id="config-form" class="space-y-4">
+          <section class="settings-card" aria-labelledby="file-title"><div class="settings-copy"><h2 id="file-title">Plik</h2><p>Nowy plik zastąpi obecnie wybrany.</p></div><div class="min-w-0"><div id="file-current" class="file-current hidden"><div class="min-w-0"><strong id="current-file-name">—</strong><small id="current-file-meta">—</small></div><button class="button button-danger" type="button" id="delete-file">Usuń</button></div><label class="drop-zone" id="drop-zone"><input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.txt"><span class="font-medium">Wybierz lub upuść plik</span><small>PDF, PNG, JPG lub TXT · maks. {{ max_upload_mb }} MB</small><span id="upload-progress" class="text-sm text-neutral-700"></span></label></div></section>
+
+          <section class="settings-card" aria-labelledby="printer-title"><div class="settings-copy"><h2 id="printer-title">Drukarka</h2><p>Wybierz kolejkę CUPS albo dodaj drukarkę IPP.</p></div><div class="space-y-3"><label class="field-label" for="printer-select">Aktywna kolejka</label><select class="field" id="printer-select" name="printer_name"><option value="">Wybierz drukarkę</option></select><div class="flex flex-wrap gap-2"><button class="button button-secondary" type="button" id="refresh-printers">Odśwież</button><button class="button button-secondary" type="button" id="discover-printers">Wykryj</button><button class="button button-secondary" type="button" id="edit-printer" disabled>Edytuj</button><button class="button button-primary" type="button" id="open-printer-dialog">Dodaj drukarkę</button></div><div class="hidden rounded-lg border border-neutral-200 bg-neutral-50 p-4" id="discovered"><p class="card-label">Wykryte urządzenia</p><div id="discovered-list" class="mt-2 space-y-2"></div></div></div></section>
+
+          <section class="settings-card" aria-labelledby="schedule-title"><div class="settings-copy"><h2 id="schedule-title">Harmonogram</h2><p>Ustaw częstotliwość i strefę czasową.</p></div><div class="space-y-4">
+            <label class="switch-line" for="enabled"><span><strong>Automatyczne drukowanie</strong><small>Włącz zadanie według poniższych ustawień.</small></span><input type="checkbox" id="enabled"></label>
+            <div><label class="field-label" for="schedule-type">Częstotliwość</label><select class="field" id="schedule-type"><option value="interval">Co określony czas</option><option value="weekly">W wybrane dni tygodnia</option><option value="monthly">Co miesiąc</option></select></div>
+            <div id="interval-fields" class="grid gap-3 sm:grid-cols-2"><div><label class="field-label" for="interval-value">Powtarzaj co</label><input class="field" type="number" id="interval-value" min="1" max="10080" value="60"></div><div><label class="field-label" for="interval-unit">Jednostka</label><select class="field" id="interval-unit"><option value="minutes">minut</option><option value="hours">godzin</option><option value="days">dni</option><option value="weeks">tygodni</option></select></div></div>
+            <div id="weekly-fields" class="hidden"><fieldset><legend class="field-label">Dni tygodnia</legend><div class="day-picker" id="week-days"><label><input type="checkbox" value="0"><span>Pn</span></label><label><input type="checkbox" value="1"><span>Wt</span></label><label><input type="checkbox" value="2"><span>Śr</span></label><label><input type="checkbox" value="3"><span>Cz</span></label><label><input type="checkbox" value="4"><span>Pt</span></label><label><input type="checkbox" value="5"><span>So</span></label><label><input type="checkbox" value="6"><span>Nd</span></label></div></fieldset></div>
+            <div id="monthly-fields" class="hidden space-y-3"><fieldset><legend class="field-label">Dni miesiąca</legend><div class="month-picker" id="month-days">{% for day in range(1, 32) %}<label><input type="checkbox" value="{{ day }}"><span>{{ day }}</span></label>{% endfor %}</div></fieldset><label class="check-line"><input type="checkbox" id="last-day-of-month"><span>Ostatni dzień miesiąca</span></label><p class="field-help">Terminy nieistniejące w krótszym miesiącu są pomijane.</p></div>
+            <div id="time-field"><label class="field-label" for="time-of-day">Godzina</label><input class="field" type="time" id="time-of-day" value="08:00"><p class="field-help" id="interval-time-help">Dla interwału dziennego lub tygodniowego pierwszy termin wypada o tej godzinie.</p></div>
+            <div><label class="field-label" for="timezone">Strefa czasowa</label><input class="field" type="text" id="timezone" value="Europe/Warsaw" autocomplete="off"></div>
+            <div class="rounded-lg border border-neutral-200 bg-neutral-50 p-4" aria-live="polite"><p class="card-label">Najbliższe terminy</p><ol class="mt-2 space-y-1 text-sm text-neutral-700" id="schedule-preview"><li>Uzupełnij harmonogram.</li></ol></div>
+          </div></section>
+        </form>
+      </section>
+
+      <section class="view" id="view-history" aria-labelledby="history-title"><div class="section-head"><div><h1 id="history-title">Historia</h1><p>Wyniki wykonanych zadań drukowania.</p></div><button class="button button-secondary" id="refresh-history">Odśwież</button></div><div class="table-wrap"><table><thead><tr><th>Data i czas</th><th>Plik</th><th>Drukarka</th><th>Tryb</th><th>Status</th><th>Informacja</th></tr></thead><tbody id="history-body"></tbody></table></div></section>
+      <section class="view" id="view-logs" aria-labelledby="logs-title"><div class="section-head"><div><h1 id="logs-title">Logi</h1><p>Ostatnie wpisy z działania aplikacji.</p></div><button class="button button-secondary" id="refresh-logs">Odśwież</button></div><pre class="log-view" id="log-content" tabindex="0">Ładowanie…</pre></section>
+    </main>
+  </div>
+
+  <dialog id="printer-dialog"><form method="dialog" id="printer-form" class="dialog-form"><div class="flex items-start justify-between gap-4"><div><h2 id="printer-dialog-title">Dodaj drukarkę</h2><p class="mt-1 text-sm text-neutral-600">Podaj dane kolejki IPP Everywhere.</p></div><button class="icon-button" type="button" id="close-printer-dialog" aria-label="Zamknij">×</button></div><input type="hidden" id="printer-form-mode" value="add"><div><label class="field-label" for="printer-add-name">Nazwa kolejki</label><input class="field" id="printer-add-name" required pattern="[A-Za-z0-9._-]+" placeholder="Canon_biuro"></div><div><label class="field-label" for="printer-add-uri">Adres IPP</label><input class="field" id="printer-add-uri" required type="url" placeholder="ipp://192.168.1.40/ipp/print"></div><div><label class="field-label" for="printer-add-location">Lokalizacja</label><input class="field" id="printer-add-location" placeholder="Biuro"></div><div class="flex justify-end gap-2"><button class="button button-secondary" type="button" id="cancel-printer-dialog">Anuluj</button><button class="button button-primary" type="submit" id="printer-submit">Dodaj</button></div></form></dialog>
+
+  <section id="login-screen" class="fixed inset-0 z-50 hidden place-items-center bg-white/90 p-4 backdrop-blur-sm" aria-labelledby="login-title"><form id="login-form" class="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-6 shadow-xl"><div class="mb-6"><img src="/static/logo.svg" alt="AutoPrint" class="mb-5 h-11 w-auto"><h1 id="login-title" class="text-lg">Logowanie</h1><p class="mt-1 text-sm text-neutral-600">Zaloguj się do panelu AutoPrint.</p></div><div class="space-y-4"><div><label class="field-label" for="login-username">Nazwa użytkownika</label><input class="field" id="login-username" autocomplete="username" required></div><div><label class="field-label" for="login-password">Hasło</label><input class="field" id="login-password" type="password" autocomplete="current-password" required></div><p id="login-error" class="min-h-5 text-sm text-red-700" role="alert"></p><button class="button button-primary w-full" id="login-submit" type="submit">Zaloguj</button></div></form></section>
+  <div class="toast-region" id="toasts" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

@@ -1,0 +1,2 @@
+"""AutoPrint application package."""
+

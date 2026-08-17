@@ -1,0 +1,13 @@
+{
+  "name": "autoprint-ui",
+  "private": true,
+  "scripts": {
+    "build:css": "node ./scripts/copy-fonts.mjs && tailwindcss -i ./app/static/tailwind.input.css -o ./app/static/app.css --minify && node ./scripts/prepend-css-banner.mjs",
+    "watch:css": "tailwindcss -i ./app/static/tailwind.input.css -o ./app/static/app.css --watch"
+  },
+  "devDependencies": {
+    "@fontsource-variable/geist": "^5.3.0",
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0"
+  }
+}

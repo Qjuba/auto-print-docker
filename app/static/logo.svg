@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="852" height="310" viewBox="46 -1 852 310" overflow="visible" role="img" aria-labelledby="title desc">
+  <title id="title">AutoPrint logo</title>
+  <desc id="desc">Minimalistyczny czarno-biały znak drukarki i kartki ze strzałką oraz napis AutoPrint.</desc>
+
+  <g transform="translate(42 40) scale(.72)" fill="none" stroke="#000" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M72 145V78c0-22 18-40 40-40h154c22 0 40 18 40 40v67c0 14-11 25-25 25h-32v-46H129v46H97c-14 0-25-11-25-25Z"/>
+    <path d="M129 124v130h90"/>
+    <path d="M220 230l24 24-24 24"/>
+  </g>
+
+  <text x="305" y="205" fill="#000" font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="146" font-weight="500" letter-spacing="-6">AutoPrint</text>
+</svg>

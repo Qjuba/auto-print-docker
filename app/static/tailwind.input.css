@@ -1,0 +1,105 @@
+/*! Hallmark · pre-emit critique: P5 H4 E4 S5 R5 V4
+ * Hallmark · macrostructure: Bento Grid · tone: utilitarian · anchor hue: neutral
+ * genre: modern-minimal · theme: monochrome utility · enrichment: none · nav: N9
+ * contrast: pass (40–41) · slop: pass (42–45) · mobile: pass (34, 49, 50–57)
+ */
+@import "tailwindcss";
+
+@theme inline { --font-sans: var(--font-body); --font-mono: var(--font-mono); }
+
+@font-face {
+  font-family: "Geist Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/static/fonts/geist-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Geist Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/static/fonts/geist-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@layer base {
+  html, body { overflow-x: clip; }
+  body { font-family: var(--font-body); }
+  h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-style: normal; font-family: var(--font-display); color: var(--color-ink); }
+  h1 { @apply text-2xl font-semibold tracking-tight; }
+  h2 { @apply text-lg font-semibold tracking-tight; }
+  button, a, [role="button"], input[type="button"], input[type="submit"], input[type="reset"] {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:disabled, input:disabled { cursor: not-allowed; }
+  :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+}
+
+@layer components {
+  .skip-link { @apply fixed left-4 top-0 z-[70] -translate-y-full bg-neutral-950 px-4 py-3 text-sm font-medium text-white; }
+  .skip-link:focus { @apply translate-y-0; }
+  .view { @apply hidden; } .view.active { @apply block; }
+  .nav-link { @apply inline-flex min-h-11 cursor-pointer items-center justify-center whitespace-nowrap border-b-2 border-transparent px-1 text-[.7rem] font-medium text-neutral-500 sm:px-3 sm:text-sm; }
+  .nav-link.active { @apply border-neutral-950 text-neutral-950; }
+  .section-head { @apply mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between; }
+  .section-head p { @apply mt-1 text-sm text-neutral-600; }
+  .button { @apply inline-flex h-11 box-border items-center justify-center whitespace-nowrap rounded-lg border px-4 text-sm font-medium leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50; transition-duration: var(--dur-short); }
+  .button-primary { @apply min-w-28 border-neutral-950 bg-neutral-950 text-white; }
+  .button-secondary { @apply min-w-28 border-neutral-300 bg-white text-neutral-950; }
+  .button-quiet { @apply border-transparent bg-transparent px-2 text-neutral-600; }
+  .button-danger { @apply min-w-28 border-red-200 bg-white text-red-700; }
+  .link-button { @apply min-h-11 whitespace-nowrap text-sm font-medium underline decoration-neutral-300 underline-offset-4; }
+  .summary-card { @apply min-w-0 rounded-xl border border-neutral-200 bg-white p-5; }
+  .summary-card strong { @apply mt-5 block truncate text-lg font-semibold; }
+  .summary-card small { @apply mt-1 block text-sm text-neutral-600; }
+  .card-label { @apply text-xs font-medium uppercase tracking-wide text-neutral-500; }
+  .status-dot { @apply inline-block size-2.5 shrink-0 rounded-full bg-neutral-300; }
+  .status-dot.ok { @apply bg-emerald-600; }
+  .settings-card { @apply grid gap-5 rounded-xl border border-neutral-200 bg-white p-5 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.5fr)] md:p-6; }
+  .settings-copy p { @apply mt-1 max-w-sm text-sm text-neutral-600; }
+  .field-label { @apply mb-1.5 block text-sm font-medium text-neutral-800; }
+  .field { @apply block min-h-11 w-full rounded-lg border border-neutral-300 bg-white px-3 text-sm text-neutral-950 outline outline-2 outline-transparent placeholder:text-neutral-400; }
+  .field:focus { outline-color: var(--color-focus); outline-offset: 1px; }
+  .field:disabled { @apply cursor-not-allowed bg-neutral-100 opacity-55; }
+  .field[aria-invalid="true"], .field[data-state="error"] { border-color: var(--color-error); }
+  .field[data-state="success"] { border-color: var(--color-success); }
+  .field[data-state="loading"] { @apply cursor-progress bg-neutral-50; }
+  .field-help { @apply mt-1 min-h-5 text-xs text-neutral-500; }
+  .file-current { @apply mb-3 flex items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-50 p-3; }
+  .file-current strong, .file-current small { @apply block truncate; } .file-current small { @apply mt-1 text-xs text-neutral-500; }
+  .drop-zone { @apply grid min-h-32 cursor-pointer place-items-center content-center gap-1 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-5 text-center; }
+  .drop-zone input { @apply sr-only; } .drop-zone small { @apply text-sm font-normal text-neutral-500; } .drop-zone.drag { @apply border-neutral-950 bg-neutral-100; }
+  .switch-line { @apply flex min-h-16 cursor-pointer items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-50 p-3; }
+  .switch-line strong, .switch-line small { @apply block; } .switch-line small { @apply mt-0.5 text-xs font-normal text-neutral-500; } .switch-line input { @apply size-5 accent-neutral-950; }
+  .day-picker { @apply grid grid-cols-4 gap-2 sm:grid-cols-7; } .day-picker label { @apply relative; } .day-picker input { @apply sr-only; }
+  .day-picker span { @apply grid min-h-11 cursor-pointer place-items-center rounded-lg border border-neutral-300 bg-white text-sm font-medium; }
+  .day-picker input:checked + span { @apply border-neutral-950 bg-neutral-950 text-white; }
+  .day-picker input:focus-visible + span { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .month-picker { @apply grid grid-cols-7 gap-1.5; } .month-picker label { @apply relative; } .month-picker input { @apply sr-only; }
+  .month-picker span { @apply grid min-h-10 cursor-pointer place-items-center rounded-md border border-neutral-300 bg-white text-xs font-medium; }
+  .month-picker input:checked + span { @apply border-neutral-950 bg-neutral-950 text-white; }
+  .month-picker input:focus-visible + span { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .check-line { @apply flex min-h-11 cursor-pointer items-center gap-3 text-sm font-medium; } .check-line input { @apply size-4 accent-neutral-950; }
+  .table-wrap { @apply overflow-x-auto rounded-xl border border-neutral-200; } table { @apply w-full min-w-[42rem] border-collapse text-left text-sm; }
+  th { @apply bg-neutral-50 px-4 py-3 text-xs font-medium uppercase tracking-wide text-neutral-500; } td { @apply border-t border-neutral-200 px-4 py-3 align-top; }
+  .empty-row { @apply py-10 text-center text-neutral-500; } .badge { @apply inline-flex rounded-full border px-2 py-1 text-xs font-medium; }
+  .badge.submitted { @apply border-emerald-200 bg-emerald-50 text-emerald-800; } .badge.failed { @apply border-red-200 bg-red-50 text-red-800; }
+  .log-view { @apply max-h-[70svh] min-h-96 overflow-auto rounded-xl bg-neutral-950 p-4 font-mono text-xs leading-6 text-neutral-200; }
+  dialog { @apply fixed inset-0 m-auto h-fit max-h-[85svh] w-[min(32rem,calc(100%-2rem))] rounded-xl border border-neutral-200 bg-white p-0 text-neutral-950 shadow-2xl; }
+  dialog::backdrop { @apply bg-neutral-950/40; } .dialog-form { @apply space-y-4 p-5 sm:p-6; } .icon-button { @apply grid size-11 shrink-0 place-items-center rounded-lg text-2xl text-neutral-500; }
+  .toast-region { @apply fixed bottom-4 right-4 z-[60] flex w-[min(24rem,calc(100%-2rem))] flex-col gap-2; }
+  .toast { @apply rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white shadow-lg; } .toast.error { @apply border-red-700 bg-red-800; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:hover, .button-quiet:hover { @apply text-neutral-950; } .button-primary:hover { @apply bg-neutral-800; }
+  .button-secondary:hover, .button-danger:hover { @apply bg-neutral-50; } .drop-zone:hover { @apply border-neutral-500 bg-neutral-100; }
+  .field:hover { @apply bg-neutral-50; }
+}
+.button:active, .nav-link:active, .icon-button:active { transform: translateY(1px); }
+.field:active { background-color: var(--color-paper-2); }
+a:active { opacity: .75; }
+.button[data-state="loading"] { cursor: progress; opacity: .65; } .button[data-state="success"] { border-color: var(--color-success); } .button[data-state="error"] { border-color: var(--color-error); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0ms !important; } }

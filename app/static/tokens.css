@@ -1,0 +1,12 @@
+/* Hallmark · tokens · genre: modern-minimal · theme: monochrome utility */
+:root {
+  --color-paper: oklch(100% 0 0); --color-paper-2: oklch(97% 0 0); --color-paper-3: oklch(94% 0 0);
+  --color-ink: oklch(14% 0 0); --color-ink-2: oklch(34% 0 0); --color-muted: oklch(48% 0 0);
+  --color-rule: oklch(90% 0 0); --color-rule-2: oklch(78% 0 0); --color-accent: oklch(14% 0 0);
+  --color-accent-ink: oklch(100% 0 0); --color-focus: oklch(48% .2 265); --color-success: oklch(45% .12 155); --color-error: oklch(48% .19 25);
+  --font-display: "Geist Variable", ui-sans-serif, system-ui, sans-serif; --font-body: "Geist Variable", ui-sans-serif, system-ui, sans-serif; --font-mono: "SFMono-Regular", Consolas, monospace;
+  --space-3xs: .25rem; --space-2xs: .5rem; --space-xs: .75rem; --space-sm: 1rem; --space-md: 1.5rem; --space-lg: 2rem; --space-xl: 3rem; --space-2xl: 4rem;
+  --text-xs: .75rem; --text-sm: .875rem; --text-md: 1rem; --text-lg: 1.25rem; --text-xl: 1.5rem; --text-2xl: 2rem;
+  --ease-out: cubic-bezier(.16, 1, .3, 1); --ease-in: cubic-bezier(.7, 0, .84, 0); --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --dur-short: 140ms; --dur-medium: 220ms; --radius-input: .5rem; --radius-card: .75rem; --radius-pill: 999px; --rule-thin: 1px;
+}

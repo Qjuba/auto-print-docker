@@ -1,0 +1,15 @@
+.env
+.venv/
+venv/
+data/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.idea/
+.vscode/
+node_modules/
+.DS_Store
+.hallmark/
