@@ -46,10 +46,10 @@
   .section-head { @apply mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between; }
   .section-head p { @apply mt-1 text-sm text-neutral-600; }
   .button { @apply inline-flex h-11 box-border items-center justify-center whitespace-nowrap rounded-lg border px-4 text-sm font-medium leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50; transition-duration: var(--dur-short); }
-  .button-primary { @apply min-w-28 border-neutral-950 bg-neutral-950 text-white; }
-  .button-secondary { @apply min-w-28 border-neutral-300 bg-white text-neutral-950; }
+  .button-primary { @apply w-32 border-neutral-950 bg-neutral-950 text-white; }
+  .button-secondary { @apply w-32 border-neutral-300 bg-white text-neutral-950; }
   .button-quiet { @apply border-transparent bg-transparent px-2 text-neutral-600; }
-  .button-danger { @apply min-w-28 border-red-200 bg-white text-red-700; }
+  .button-danger { @apply w-32 border-red-200 bg-white text-red-700; }
   .link-button { @apply min-h-11 whitespace-nowrap text-sm font-medium underline decoration-neutral-300 underline-offset-4; }
   .summary-card { @apply min-w-0 rounded-xl border border-neutral-200 bg-white p-5; }
   .summary-card strong { @apply mt-5 block truncate text-lg font-semibold; }
