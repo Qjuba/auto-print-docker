@@ -52,6 +52,14 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=tu-wpisz-dlugie-losowe-haslo
 ```
 
+Zamiast `.env` możesz użyć pliku `stack.env`, np. przy wdrożeniu przez Portainer:
+
+```bash
+cp .env.example stack.env
+```
+
+Jeśli istnieją oba pliki, wartości ze `stack.env` mają pierwszeństwo.
+
 ### 3. Uruchom aplikację
 
 ```bash

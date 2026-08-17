@@ -1,5 +1,6 @@
 .git
 .env
+stack.env
 .venv
 node_modules
 data
