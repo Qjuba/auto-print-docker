@@ -134,15 +134,6 @@ Jeśli wydruk nie dochodzi do drukarki, sprawdź kolejno:
 - czy w panelu AutoPrint wybrano plik i właściwą kolejkę drukarki;
 - czy historia wydruków zawiera komunikat błędu.
 
-## Bezpieczeństwo
-
-- nie publikuj pliku `.env` ani prawdziwych haseł;
-- poza zaufaną siecią lokalną używaj HTTPS i reverse proxy;
-- nie wystawiaj niezabezpieczonego panelu bezpośrednio do Internetu;
-- kopie zapasowe powinny obejmować wolumen `autoprint-data`.
-
-Sposób prywatnego zgłaszania podatności opisuje [SECURITY.md](SECURITY.md).
-
 ## Zatrzymanie aplikacji
 
 ```bash
