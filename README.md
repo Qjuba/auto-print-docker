@@ -159,9 +159,7 @@ a bezpieczne zgłaszanie podatności — [SECURITY.md](SECURITY.md).
 
 ## Licencja
 
-Repozytorium nie zawiera obecnie licencji open source. Publiczny dostęp do kodu nie oznacza zgody
-na jego kopiowanie, modyfikowanie ani redystrybucję. Właściciel projektu może później dodać
-wybraną licencję, np. MIT, Apache-2.0 albo GPL-3.0.
+Projekt jest udostępniany na licencji MIT. Szczegóły znajdują się w pliku [LICENSE](LICENSE).
 
 ## Aktualizacja i kopia zapasowa
 
