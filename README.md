@@ -151,10 +151,6 @@ docker compose down
 To polecenie nie usuwa zapisanych danych. Polecenie `docker compose down -v` usuwa wszystkie
 wolumeny projektu i powoduje utratę konfiguracji oraz historii.
 
-## Rozwój projektu
-
-Informacje dla osób rozwijających kod znajdują się w [CONTRIBUTING.md](CONTRIBUTING.md).
-
 ## Licencja
 
 AutoPrint jest udostępniany na licencji MIT. Szczegóły znajdują się w pliku [LICENSE](LICENSE).
