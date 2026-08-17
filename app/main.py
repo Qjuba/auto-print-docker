@@ -16,7 +16,14 @@ from sqlalchemy.orm import Session
 from app.database import Base, engine, get_db, migrate_database
 from app.files import save_validated_upload, stored_path
 from app.models import PrintHistory, StoredFile, ensure_config
-from app.printers import PrinterError, add_printer, discover_printers, list_printers, update_printer
+from app.printers import (
+    PrinterError,
+    add_printer,
+    discover_printers,
+    list_printers,
+    printer_connection_status,
+    update_printer,
+)
 from app.scheduler import next_run_time, preview_times, start_scheduler, stop_scheduler, sync_schedule
 from app.schemas import AddPrinterRequest, LoginRequest, ScheduleRule, ScheduleUpdate
 from app.security import (
@@ -164,6 +171,11 @@ def dashboard(db: Session = Depends(get_db)):
     last = db.scalars(select(PrintHistory).order_by(desc(PrintHistory.created_at)).limit(1)).first()
     printers = list_printers()
     selected_printer = next((item for item in printers if item["name"] == config.printer_name), None)
+    if selected_printer:
+        connection = printer_connection_status(selected_printer)
+        selected_printer = {**selected_printer, **connection}
+        if connection["reachable"] is False:
+            selected_printer["state"] = "unavailable"
     return {
         "enabled": config.enabled,
         "printer_name": config.printer_name,

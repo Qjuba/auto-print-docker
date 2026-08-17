@@ -3,8 +3,10 @@ from __future__ import annotations
 import logging
 import os
 import re
+import socket
 import subprocess
 from dataclasses import dataclass
+from urllib.parse import urlsplit
 
 from app.settings import settings
 
@@ -110,6 +112,39 @@ def discover_printers() -> list[dict]:
     except PrinterError:
         pass
     return list(found.values())
+
+
+def printer_connection_status(printer: dict, timeout: float = 2.5) -> dict:
+    """Check whether a direct IPP printer endpoint accepts network connections."""
+    uri = str(printer.get("uri", ""))
+    parsed = urlsplit(uri)
+    if parsed.scheme not in {"ipp", "ipps"}:
+        return {"reachable": None, "message": printer.get("message", "Brak informacji o stanie")}
+    if not parsed.hostname:
+        return {"reachable": False, "message": "Adres IPP drukarki jest nieprawidłowy"}
+
+    try:
+        port = parsed.port or 631
+    except ValueError:
+        return {"reachable": False, "message": "Port w adresie IPP drukarki jest nieprawidłowy"}
+    try:
+        connection = socket.create_connection((parsed.hostname, port), timeout=timeout)
+        connection.close()
+    except OSError:
+        return {
+            "reachable": False,
+            "message": (
+                f"Drukarka nie odpowiada pod adresem {parsed.hostname}:{port}. "
+                "Sprawdź, czy jest włączona i połączona z siecią."
+            ),
+        }
+    return {"reachable": True, "message": "Drukarka jest osiągalna"}
+
+
+def ensure_printer_reachable(printer: dict) -> None:
+    status = printer_connection_status(printer)
+    if status["reachable"] is False:
+        raise PrinterError(status["message"])
 
 
 def add_printer(name: str, uri: str, location: str = "") -> None:

@@ -7,7 +7,7 @@ from datetime import datetime
 from app.database import session_scope
 from app.files import stored_path
 from app.models import PrintHistory, ensure_config
-from app.printers import PrinterError, list_printers, submit_print
+from app.printers import PrinterError, ensure_printer_reachable, list_printers, submit_print
 from app.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,7 @@ def perform_print(trigger: str = "manual", test_page: bool = False) -> PrintHist
                 raise PrinterError("Wybrana drukarka nie jest dostępna w CUPS")
             if queue["state"] == "disabled":
                 raise PrinterError(f"Drukarka jest wyłączona: {queue['message']}")
+            ensure_printer_reachable(queue)
             temporary_name = None
             if test_page:
                 settings.data_dir.mkdir(parents=True, exist_ok=True)

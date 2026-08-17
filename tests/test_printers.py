@@ -45,3 +45,45 @@ def test_update_printer_keeps_existing_queue_name(monkeypatch):
         "lpadmin", "-p", "Canon_1", "-E", "-v", "ipps://192.0.2.10/ipp/print",
         "-m", "everywhere", "-L", "Magazyn",
     ]
+
+
+def test_network_printer_is_reported_as_reachable(monkeypatch):
+    closed = []
+
+    class Connection:
+        def close(self):
+            closed.append(True)
+
+    monkeypatch.setattr(
+        printers.socket,
+        "create_connection",
+        lambda address, timeout: Connection(),
+    )
+    result = printers.printer_connection_status(
+        {"uri": "ipp://192.0.2.10/ipp/print", "message": "idle"}
+    )
+    assert result == {"reachable": True, "message": "Drukarka jest osiągalna"}
+    assert closed == [True]
+
+
+def test_unreachable_network_printer_is_reported_to_user(monkeypatch):
+    def refuse_connection(*_args, **_kwargs):
+        raise OSError("host unreachable")
+
+    monkeypatch.setattr(printers.socket, "create_connection", refuse_connection)
+    queue = {"uri": "ipps://printer.local/ipp/print", "message": "idle"}
+    result = printers.printer_connection_status(queue)
+    assert result["reachable"] is False
+    assert "printer.local:631" in result["message"]
+    with pytest.raises(printers.PrinterError, match="nie odpowiada"):
+        printers.ensure_printer_reachable(queue)
+
+
+def test_non_network_queue_keeps_cups_status(monkeypatch):
+    monkeypatch.setattr(
+        printers.socket,
+        "create_connection",
+        lambda *_args, **_kwargs: pytest.fail("socket should not be used"),
+    )
+    result = printers.printer_connection_status({"uri": "usb://Canon/G3010", "message": "idle"})
+    assert result == {"reachable": None, "message": "idle"}
