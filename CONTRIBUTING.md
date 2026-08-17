@@ -16,4 +16,4 @@ nie pobierać skryptów, stylów ani fontów z zewnętrznych CDN.
 ## Pull request
 
 Pull request powinien zawierać krótki opis problemu, zakres zmiany, sposób weryfikacji i — przy
-zmianach wizualnych — zrzut ekranu. Wszystkie zadania CI muszą przejść przed połączeniem zmiany.
+zmianach wizualnych — zrzut ekranu. Przed wysłaniem zmiany uruchom lokalnie testy i Ruff.
