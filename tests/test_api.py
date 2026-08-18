@@ -64,7 +64,18 @@ def test_upload_dashboard_and_failed_manual_print():
         assert preview.status_code == 200
         assert len(preview.json()["occurrences"]) == 5
 
+        cron_preview = client.post(
+            "/api/schedule/preview",
+            json={
+                "schedule_type": "crontab",
+                "cron_expression": "0 8 * * 1-5",
+                "timezone": "Europe/Warsaw",
+            },
+        )
+        assert cron_preview.status_code == 200
+        assert len(cron_preview.json()["occurrences"]) == 5
+
         printed = client.post("/api/print/manual")
         assert printed.status_code == 200
         assert printed.json()["status"] == "failed"
-        assert "drukarki" in printed.json()["message"]
+        assert "printer" in printed.json()["message"]

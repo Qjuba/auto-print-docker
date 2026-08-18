@@ -28,6 +28,7 @@ class AppConfig(Base):
     printer_name: Mapped[str | None] = mapped_column(String(127), nullable=True)
     file_id: Mapped[int | None] = mapped_column(ForeignKey("stored_files.id", ondelete="SET NULL"), nullable=True)
     schedule_type: Mapped[str] = mapped_column(String(20), default="interval")
+    cron_expression: Mapped[str] = mapped_column(String(128), default="0 8 * * *")
     interval_value: Mapped[int] = mapped_column(Integer, default=60)
     interval_unit: Mapped[str] = mapped_column(String(10), default="minutes")
     daily_time: Mapped[str] = mapped_column(String(5), default="08:00")

@@ -62,12 +62,12 @@ async def lifespan(_: FastAPI):
     Base.metadata.create_all(engine)
     migrate_database()
     start_scheduler()
-    logger.info("AutoPrint uruchomiony")
+    logger.info("AutoPrint started")
     try:
         yield
     finally:
         stop_scheduler()
-        logger.info("AutoPrint zatrzymany")
+        logger.info("AutoPrint stopped")
 
 
 app = FastAPI(
@@ -183,6 +183,7 @@ def dashboard(db: Session = Depends(get_db)):
         "file": file_json(config.selected_file),
         "schedule": {
             "type": config.schedule_type,
+            "cron_expression": config.cron_expression,
             "interval_value": config.interval_value,
             "interval_unit": config.interval_unit,
             "time_of_day": config.time_of_day,
@@ -208,6 +209,7 @@ def update_config(payload: ScheduleUpdate, db: Session = Depends(get_db)):
     config.enabled = payload.enabled
     config.printer_name = payload.printer_name
     config.schedule_type = payload.schedule_type
+    config.cron_expression = payload.cron_expression
     config.interval_value = payload.interval_value
     config.interval_unit = payload.interval_unit
     config.time_of_day = payload.time_of_day

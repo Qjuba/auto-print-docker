@@ -32,6 +32,34 @@ def test_failed_cups_command_is_reported(monkeypatch):
         printers.submit_print("Canon", "/tmp/file.pdf", "Test")
 
 
+def test_missing_cups_destinations_are_logged_once_until_recovery(monkeypatch, caplog):
+    state = {"available": False}
+
+    def fake_run(args, **_kwargs):
+        if not state["available"]:
+            raise printers.PrinterError("lpstat: No destinations added.")
+        if args == ["lpstat", "-v"]:
+            return printers.CommandResult("device for Canon: ipp://printer.local/ipp/print", "")
+        return printers.CommandResult("", "")
+
+    monkeypatch.setattr(printers, "_run", fake_run)
+    monkeypatch.setattr(printers, "_no_destinations_warning_emitted", False)
+
+    with caplog.at_level("WARNING", logger="app.printers"):
+        assert printers.list_printers() == []
+        assert printers.list_printers() == []
+        state["available"] = True
+        assert len(printers.list_printers()) == 1
+        state["available"] = False
+        assert printers.list_printers() == []
+
+    messages = [record.getMessage() for record in caplog.records]
+    assert messages == [
+        "Could not read CUPS queues: lpstat: No destinations added.",
+        "Could not read CUPS queues: lpstat: No destinations added.",
+    ]
+
+
 def test_update_printer_keeps_existing_queue_name(monkeypatch):
     captured = {}
 
@@ -62,7 +90,7 @@ def test_network_printer_is_reported_as_reachable(monkeypatch):
     result = printers.printer_connection_status(
         {"uri": "ipp://192.0.2.10/ipp/print", "message": "idle"}
     )
-    assert result == {"reachable": True, "message": "Drukarka jest osiągalna"}
+    assert result == {"reachable": True, "message": "The printer is reachable"}
     assert closed == [True]
 
 
@@ -75,7 +103,7 @@ def test_unreachable_network_printer_is_reported_to_user(monkeypatch):
     result = printers.printer_connection_status(queue)
     assert result["reachable"] is False
     assert "printer.local:631" in result["message"]
-    with pytest.raises(printers.PrinterError, match="nie odpowiada"):
+    with pytest.raises(printers.PrinterError, match="not responding"):
         printers.ensure_printer_reachable(queue)
 
 
