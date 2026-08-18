@@ -17,7 +17,7 @@ def perform_print(trigger: str = "manual", test_page: bool = False) -> PrintHist
     with session_scope() as session:
         config = ensure_config(session)
         printer = config.printer_name or "—"
-        file_name = "Strona testowa AutoPrint" if test_page else (
+        file_name = "AutoPrint test page" if test_page else (
             config.selected_file.original_name if config.selected_file else "—"
         )
         history = PrintHistory(
@@ -32,15 +32,15 @@ def perform_print(trigger: str = "manual", test_page: bool = False) -> PrintHist
 
         try:
             if not config.printer_name:
-                raise PrinterError("Nie wybrano drukarki")
+                raise PrinterError("No printer selected")
             queue = next(
                 (item for item in list_printers() if item["name"] == config.printer_name),
                 None,
             )
             if queue is None:
-                raise PrinterError("Wybrana drukarka nie jest dostępna w CUPS")
+                raise PrinterError("The selected printer is not available in CUPS")
             if queue["state"] == "disabled":
-                raise PrinterError(f"Drukarka jest wyłączona: {queue['message']}")
+                raise PrinterError(f"The printer is disabled: {queue['message']}")
             ensure_printer_reachable(queue)
             temporary_name = None
             if test_page:
@@ -51,18 +51,18 @@ def perform_print(trigger: str = "manual", test_page: bool = False) -> PrintHist
                 ) as test_file:
                     temporary_name = test_file.name
                     test_file.write(
-                        "AUTOPRINT — STRONA TESTOWA\n\n"
-                        f"Drukarka: {config.printer_name}\n"
-                        f"Data: {datetime.now().astimezone().isoformat(timespec='seconds')}\n\n"
-                        "Jeżeli widzisz tę stronę, połączenie CUPS/IPP działa poprawnie.\n"
+                        "AUTOPRINT — TEST PAGE\n\n"
+                        f"Printer: {config.printer_name}\n"
+                        f"Date: {datetime.now().astimezone().isoformat(timespec='seconds')}\n\n"
+                        "If you can see this page, the CUPS/IPP connection is working correctly.\n"
                     )
                 path = temporary_name
             else:
                 if not config.selected_file:
-                    raise PrinterError("Nie wybrano pliku do drukowania")
+                    raise PrinterError("No file selected for printing")
                 path_obj = stored_path(config.selected_file.stored_name)
                 if not path_obj.is_file():
-                    raise PrinterError("Wybrany plik nie istnieje w magazynie")
+                    raise PrinterError("The selected file does not exist in storage")
                 path = str(path_obj)
 
             try:
@@ -72,12 +72,12 @@ def perform_print(trigger: str = "manual", test_page: bool = False) -> PrintHist
                     __import__("pathlib").Path(temporary_name).unlink(missing_ok=True)
             history.status = "submitted"
             history.cups_job_id = job_id
-            history.message = "Zadanie zostało przyjęte przez CUPS"
-            logger.info("Przekazano wydruk %s do %s (%s)", file_name, printer, trigger)
+            history.message = "The print job was accepted by CUPS"
+            logger.info("Submitted print job %s to %s (%s)", file_name, printer, trigger)
         except Exception as exc:
             history.status = "failed"
             history.message = str(exc)[:1000]
-            logger.error("Wydruk %s nie powiódł się: %s", trigger, exc)
+            logger.error("Print job %s failed: %s", trigger, exc)
         session.flush()
         session.expunge(history)
         return history

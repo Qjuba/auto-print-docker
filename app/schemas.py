@@ -5,9 +5,12 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.cron import normalize_crontab
+
 
 class ScheduleRule(BaseModel):
     schedule_type: str
+    cron_expression: str = Field(default="0 8 * * *", max_length=128)
     interval_value: int = Field(default=60, ge=1, le=10080)
     interval_unit: str = "minutes"
     time_of_day: str = "08:00"
@@ -19,9 +22,14 @@ class ScheduleRule(BaseModel):
     @field_validator("schedule_type")
     @classmethod
     def valid_type(cls, value: str) -> str:
-        if value not in {"interval", "weekly", "monthly"}:
+        if value not in {"interval", "weekly", "monthly", "crontab"}:
             raise ValueError("Nieobsługiwany rodzaj harmonogramu")
         return value
+
+    @field_validator("cron_expression")
+    @classmethod
+    def valid_crontab(cls, value: str) -> str:
+        return normalize_crontab(value)
 
     @field_validator("interval_unit")
     @classmethod

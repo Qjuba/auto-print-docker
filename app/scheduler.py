@@ -10,6 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
+from app.cron import build_crontab_trigger
 from app.database import SessionLocal, engine
 from app.models import ensure_config
 from app.settings import settings
@@ -20,6 +21,7 @@ JOB_ID = "automatic-print"
 
 class ScheduleConfig(Protocol):
     schedule_type: str
+    cron_expression: str
     interval_value: int
     interval_unit: str
     time_of_day: str
@@ -52,6 +54,8 @@ def _monthly_expression(config: ScheduleConfig) -> str:
 
 def build_trigger(config: ScheduleConfig, now: datetime | None = None):
     timezone = ZoneInfo(config.timezone)
+    if config.schedule_type == "crontab":
+        return build_crontab_trigger(config.cron_expression, timezone)
     if config.schedule_type == "interval":
         kwargs = {config.interval_unit: config.interval_value, "timezone": timezone}
         if config.interval_unit in {"days", "weeks"}:
@@ -104,7 +108,7 @@ def sync_schedule(preserve_existing: bool = False) -> None:
                 scheduler.remove_job(JOB_ID)
             return
         if preserve_existing and scheduler.get_job(JOB_ID):
-            logger.info("Przywrócono utrwalony termin automatycznego wydruku")
+            logger.info("Restored the persisted automatic print run time")
             return
 
         trigger = build_trigger(config)
@@ -113,9 +117,9 @@ def sync_schedule(preserve_existing: bool = False) -> None:
             trigger=trigger,
             id=JOB_ID,
             replace_existing=True,
-            name="Automatyczny wydruk",
+            name="Automatic print",
         )
-        logger.info("Zaktualizowano harmonogram automatycznego drukowania")
+        logger.info("Updated the automatic printing schedule")
 
 
 def next_run_time() -> datetime | None:

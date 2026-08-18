@@ -67,4 +67,8 @@ def migrate_database() -> None:
         if "days_of_month" not in columns:
             connection.execute(text("ALTER TABLE app_config ADD COLUMN days_of_month VARCHAR(100) NOT NULL DEFAULT '1'"))
             connection.execute(text("UPDATE app_config SET days_of_month = CAST(monthly_day AS TEXT)"))
+        if "cron_expression" not in columns:
+            connection.execute(
+                text("ALTER TABLE app_config ADD COLUMN cron_expression VARCHAR(128) NOT NULL DEFAULT '0 8 * * *'")
+            )
         connection.execute(text("UPDATE app_config SET schedule_type = 'weekly' WHERE schedule_type = 'daily'"))

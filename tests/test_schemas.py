@@ -54,3 +54,28 @@ def test_schedule_rejects_monthly_rule_without_any_day():
             days_of_month=[],
             last_day_of_month=False,
         )
+
+
+def test_schedule_accepts_and_normalizes_crontab():
+    model = ScheduleUpdate(
+        enabled=False,
+        schedule_type="crontab",
+        cron_expression="  0   8  * * 1-5  ",
+    )
+    assert model.cron_expression == "0 8 * * 1-5"
+
+
+@pytest.mark.parametrize(
+    "expression",
+    [
+        "@daily",
+        "0 8 * *",
+        "0 8 * * * command",
+        "0 8 * * 8",
+        "0 8 * * 5-1",
+        "0 8 last * *",
+    ],
+)
+def test_schedule_rejects_invalid_crontab(expression):
+    with pytest.raises(ValidationError):
+        ScheduleUpdate(enabled=False, schedule_type="crontab", cron_expression=expression)

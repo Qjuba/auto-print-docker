@@ -5,12 +5,15 @@ import os
 import re
 import socket
 import subprocess
+import threading
 from dataclasses import dataclass
 from urllib.parse import urlsplit
 
 from app.settings import settings
 
 logger = logging.getLogger(__name__)
+_cups_queue_warning_lock = threading.Lock()
+_no_destinations_warning_emitted = False
 
 
 class PrinterError(RuntimeError):
@@ -21,6 +24,26 @@ class PrinterError(RuntimeError):
 class CommandResult:
     stdout: str
     stderr: str
+
+
+def _log_cups_queue_error(error: PrinterError) -> None:
+    global _no_destinations_warning_emitted
+    message = str(error)
+    if "no destinations added" not in message.lower():
+        logger.warning("Could not read CUPS queues: %s", message)
+        return
+
+    with _cups_queue_warning_lock:
+        if _no_destinations_warning_emitted:
+            return
+        _no_destinations_warning_emitted = True
+    logger.warning("Could not read CUPS queues: %s", message)
+
+
+def _reset_no_destinations_warning() -> None:
+    global _no_destinations_warning_emitted
+    with _cups_queue_warning_lock:
+        _no_destinations_warning_emitted = False
 
 
 def _run(args: list[str], timeout: int = 12) -> CommandResult:
@@ -36,11 +59,11 @@ def _run(args: list[str], timeout: int = 12) -> CommandResult:
             check=False,
         )
     except FileNotFoundError as exc:
-        raise PrinterError(f"Brak narzędzia systemowego: {args[0]}") from exc
+        raise PrinterError(f"Missing system tool: {args[0]}") from exc
     except subprocess.TimeoutExpired as exc:
-        raise PrinterError("Przekroczono czas odpowiedzi usługi drukowania") from exc
+        raise PrinterError("The printing service timed out") from exc
     if result.returncode != 0:
-        message = (result.stderr or result.stdout or "Nieznany błąd CUPS").strip()
+        message = (result.stderr or result.stdout or "Unknown CUPS error").strip()
         raise PrinterError(message[:800])
     return CommandResult(result.stdout, result.stderr)
 
@@ -49,8 +72,9 @@ def list_printers() -> list[dict]:
     try:
         devices = _run(["lpstat", "-v"]).stdout
     except PrinterError as exc:
-        logger.warning("Nie można odczytać kolejek CUPS: %s", exc)
+        _log_cups_queue_error(exc)
         return []
+    _reset_no_destinations_warning()
 
     statuses: dict[str, dict] = {}
     try:
@@ -85,7 +109,7 @@ def list_printers() -> list[dict]:
         name, uri = match.groups()
         status = {
             "state": "unknown",
-            "message": "Brak informacji o stanie",
+            "message": "No status information",
             "location": "",
             **statuses.get(name, {}),
         }
@@ -102,7 +126,7 @@ def discover_printers() -> list[dict]:
             if uri.startswith(("ipp://", "ipps://")):
                 found[uri] = {"uri": uri, "source": "IPP/mDNS"}
     except PrinterError as exc:
-        logger.info("Wykrywanie mDNS nie zwróciło urządzeń: %s", exc)
+        logger.info("mDNS discovery returned no devices: %s", exc)
 
     try:
         for line in _run(["lpinfo", "-v"], timeout=8).stdout.splitlines():
@@ -119,14 +143,14 @@ def printer_connection_status(printer: dict, timeout: float = 2.5) -> dict:
     uri = str(printer.get("uri", ""))
     parsed = urlsplit(uri)
     if parsed.scheme not in {"ipp", "ipps"}:
-        return {"reachable": None, "message": printer.get("message", "Brak informacji o stanie")}
+        return {"reachable": None, "message": printer.get("message", "No status information")}
     if not parsed.hostname:
-        return {"reachable": False, "message": "Adres IPP drukarki jest nieprawidłowy"}
+        return {"reachable": False, "message": "The printer IPP address is invalid"}
 
     try:
         port = parsed.port or 631
     except ValueError:
-        return {"reachable": False, "message": "Port w adresie IPP drukarki jest nieprawidłowy"}
+        return {"reachable": False, "message": "The port in the printer IPP address is invalid"}
     try:
         connection = socket.create_connection((parsed.hostname, port), timeout=timeout)
         connection.close()
@@ -134,11 +158,11 @@ def printer_connection_status(printer: dict, timeout: float = 2.5) -> dict:
         return {
             "reachable": False,
             "message": (
-                f"Drukarka nie odpowiada pod adresem {parsed.hostname}:{port}. "
-                "Sprawdź, czy jest włączona i połączona z siecią."
+                f"The printer is not responding at {parsed.hostname}:{port}. "
+                "Check that it is powered on and connected to the network."
             ),
         }
-    return {"reachable": True, "message": "Drukarka jest osiągalna"}
+    return {"reachable": True, "message": "The printer is reachable"}
 
 
 def ensure_printer_reachable(printer: dict) -> None:
@@ -152,13 +176,13 @@ def add_printer(name: str, uri: str, location: str = "") -> None:
     if location:
         args.extend(["-L", location])
     _run(args, timeout=30)
-    logger.info("Dodano kolejkę drukarki %s", name)
+    logger.info("Added printer queue %s", name)
 
 
 def update_printer(name: str, uri: str, location: str = "") -> None:
     args = ["lpadmin", "-p", name, "-E", "-v", uri, "-m", "everywhere", "-L", location]
     _run(args, timeout=30)
-    logger.info("Zaktualizowano kolejkę drukarki %s", name)
+    logger.info("Updated printer queue %s", name)
 
 
 def submit_print(printer_name: str, file_path: str, title: str) -> str | None:
