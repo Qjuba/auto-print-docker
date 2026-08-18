@@ -7,7 +7,7 @@ wtedy, gdy przez dłuższy czas niczego nie drukujesz.
 Aplikacja działa w lokalnej sieci, współpracuje z drukarkami obsługującymi IPP, AirPrint lub Mopria
 i udostępnia prosty panel działający na komputerze oraz telefonie.
 
-<img width="1269" height="748" alt="obraz" src="https://github.com/user-attachments/assets/d9b6b679-ff2b-478a-be97-bb05e26a9018" />
+<img width="1252" height="752" alt="image" src="https://github.com/user-attachments/assets/b2c8b54b-3623-4f83-84d1-2b9192731fdb" />
 
 
 ## Co potrafi
